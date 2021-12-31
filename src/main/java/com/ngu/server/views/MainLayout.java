@@ -1,58 +1,31 @@
 package com.ngu.server.views;
 
-import com.ngu.server.views.dashboard.DashboardView;
+import com.ngu.server.util.SpringContextUtil;
+import com.ngu.server.views.menu.MenuItem;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Footer;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Header;
-import com.vaadin.flow.component.html.ListItem;
-import com.vaadin.flow.component.html.Nav;
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.html.UnorderedList;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.theme.Theme;
+import org.springframework.context.annotation.Role;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
  * The main view is a top-level placeholder for other views.
  */
+@Route(value = "")
 @PWA(name = "Karys", shortName = "Karys", enableInstallPrompt = false)
 @Theme(themeFolder = "karys")
 @PageTitle("Main")
 public class MainLayout extends AppLayout {
-
-    public static class MenuItemInfo {
-
-        private String text;
-        private String iconClass;
-        private Class<? extends Component> view;
-
-        public MenuItemInfo(String text, String iconClass, Class<? extends Component> view) {
-            this.text = text;
-            this.iconClass = iconClass;
-            this.view = view;
-        }
-
-        public String getText() {
-            return text;
-        }
-
-        public String getIconClass() {
-            return iconClass;
-        }
-
-        public Class<? extends Component> getView() {
-            return view;
-        }
-
-    }
 
     private H1 viewTitle;
 
@@ -62,7 +35,12 @@ public class MainLayout extends AppLayout {
         addToDrawer(createDrawerContent());
     }
 
+    private Collection<MenuItem> loadMenuItemList(){
+        return SpringContextUtil.getBeanList(MenuItem.class);
+    }
+
     private Component createHeaderContent() {
+
         DrawerToggle toggle = new DrawerToggle();
         toggle.addClassName("text-secondary");
         toggle.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
@@ -78,6 +56,7 @@ public class MainLayout extends AppLayout {
     }
 
     private Component createDrawerContent() {
+
         H2 appName = new H2("Karys");
         appName.addClassNames("flex", "items-center", "h-xl", "m-0", "px-m", "text-m");
 
@@ -88,6 +67,7 @@ public class MainLayout extends AppLayout {
     }
 
     private Nav createNavigation() {
+
         Nav nav = new Nav();
         nav.addClassNames("border-b", "border-contrast-10", "flex-grow", "overflow-auto");
         nav.getElement().setAttribute("aria-labelledby", "views");
@@ -105,25 +85,22 @@ public class MainLayout extends AppLayout {
     }
 
     private List<RouterLink> createLinks() {
-        MenuItemInfo[] menuItems = new MenuItemInfo[]{ //
-                new MenuItemInfo("Dashboard", "la la-columns", DashboardView.class), //
-
-        };
         List<RouterLink> links = new ArrayList<>();
-        for (MenuItemInfo menuItemInfo : menuItems) {
-            links.add(createLink(menuItemInfo));
-
+        for (MenuItem menuItem : loadMenuItemList()) {
+            links.add(createLink(menuItem));
         }
         return links;
     }
 
-    private static RouterLink createLink(MenuItemInfo menuItemInfo) {
+    private static RouterLink createLink(MenuItem menuItemInfo) {
+
         RouterLink link = new RouterLink();
         link.addClassNames("flex", "mx-s", "p-s", "relative", "text-secondary");
         link.setRoute(menuItemInfo.getView());
 
         Span icon = new Span();
         icon.addClassNames("me-s", "text-l");
+
         if (!menuItemInfo.getIconClass().isEmpty()) {
             icon.addClassNames(menuItemInfo.getIconClass());
         }
@@ -138,7 +115,6 @@ public class MainLayout extends AppLayout {
     private Footer createFooter() {
         Footer layout = new Footer();
         layout.addClassNames("flex", "items-center", "my-s", "px-m", "py-xs");
-
         return layout;
     }
 
